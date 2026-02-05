@@ -496,6 +496,13 @@ def _clear_paragraph(paragraph) -> None:
         r._element.getparent().remove(r._element)
 
 
+def _insert_run_after(paragraph, ref_run):
+    """在指定 run 后插入一个新的 run，并返回。"""
+    new_run = paragraph.add_run()
+    ref_run._element.addnext(new_run._element)
+    return new_run
+
+
 def _replace_image_in_paragraph(paragraph, placeholder: str, image_path: str, width_cm: Optional[float]) -> bool:
     """
     图片替换策略：
@@ -525,14 +532,15 @@ def _replace_image_in_paragraph(paragraph, placeholder: str, image_path: str, wi
             before, after = run.text.split(placeholder, 1)
             run.text = before
 
-            pic_run = paragraph.add_run()
+            pic_run = _insert_run_after(paragraph, run)
             if width_cm:
                 pic_run.add_picture(image_path, width=Cm(width_cm))
             else:
                 pic_run.add_picture(image_path)
 
             if after:
-                paragraph.add_run(after)
+                after_run = _insert_run_after(paragraph, pic_run)
+                after_run.text = after
             return True
 
     # 兜底：重建段落（可能损失混排，但保证能插入）
