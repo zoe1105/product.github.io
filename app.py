@@ -153,6 +153,17 @@ def safe_filename(name: str) -> str:
     return name[:180]
 
 
+def safe_download_filename(name: str, fallback: str = "output.zip") -> str:
+    """HTTP Header 用下载文件名：仅保留 ASCII，避免响应头编码失败。"""
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", (name or "").strip())
+    cleaned = re.sub(r"_+", "_", cleaned).strip("._")
+    if not cleaned:
+        cleaned = fallback
+    if not cleaned.lower().endswith(".zip"):
+        cleaned += ".zip"
+    return cleaned[:180]
+
+
 def list_docx_files(folder: str) -> List[str]:
     """列出 folder 下的 docx 模板（过滤临时文件 ~$.docx）"""
     if not os.path.isdir(folder):
@@ -763,7 +774,7 @@ def api_generate():
     rand = ''.join(random.choice('ABCDEFGHJKLMNPQRSTUVWXYZ23456789') for _ in range(4))
     run_name = f"{run_name}_{rand}"
 
-    zip_name = f"{run_name}.zip"
+    zip_name = safe_download_filename(f"{run_name}.zip")
 
     # ========= 生成并打包（内存里完成） =========
     zip_buf = io.BytesIO()
@@ -822,7 +833,7 @@ def api_generate():
         max_age=0,
     )
     # 轻量元信息（可选）
-    resp.headers["X-Job-Id"] = run_name
+    resp.headers["X-Job-Id"] = safe_download_filename(run_name, fallback="job")
     resp.headers["X-Generated-Count"] = str(len(generated_files))
     return resp
 
