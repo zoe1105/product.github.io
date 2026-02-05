@@ -31,10 +31,18 @@ python app.py
 
 ## 常见问题：Vercel 部署后 404
 
-如果仓库根目录只有 `app.py` 而没有 `vercel.json`，Vercel 可能无法正确识别 Flask 入口并把请求转发到 Python 函数，访问首页或 `/api/*` 会出现 404。
+404 常见原因通常有两类：
 
-本仓库现在通过 `vercel.json` 显式声明：
-- `app.py` 在 `functions` 中声明为 Python 3.12 运行时；
-- `/static/*` 指向 `public/static/*`；
-- 其余路由统一转发到 `app.py`。
+1. **入口未声明**：仓库根目录有 `app.py`，但没有在 `vercel.json` 里声明 Python Function。
+2. **路由顺序不当**：把所有请求都强制转发到 `app.py`，导致 `public/` 下的静态文件（如 `index.html`、`/static/*`）无法由 Vercel 文件系统优先命中。
+
+本仓库现在的解决方案：
+- `functions.app.py.runtime = python3.12`，明确函数入口；
+- `routes` 第一条使用 `{"handle": "filesystem"}`，让 Vercel 先匹配 `public/` 静态资源；
+- 未命中静态文件时，再由 `/(.*) -> /app.py` 兜底，确保 `/api/*` 与动态路由都进入 Flask。
+
+如果你仍看到 404，请优先检查：
+- Vercel Project 的 **Root Directory** 是否指向当前仓库根目录；
+- 部署日志里是否出现 `app.py` 被识别为 Python Function；
+- 访问路径是否正确（首页 `/`、接口 `/api/...`）。
 
