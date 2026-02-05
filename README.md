@@ -23,5 +23,7 @@ python app.py
 2. 在 Vercel 里 Import Git Repository
 3. 直接 Deploy（无需 build command）
 
+> 关键：仓库根目录包含 `vercel.json`，用于把所有路由转发到 `app.py`（Flask）并正确映射 `/static/*` 到 `public/static/*`。
+>
 > 提示：Vercel 建议把静态资源放到 `public/`，并且函数环境的磁盘是临时的，所以本项目改成 **/api/generate 直接返回 zip**。
 
