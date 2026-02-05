@@ -3,7 +3,7 @@
 这是一个「前端表单 + Flask API + docx 模板替换 + zip 下载」的小工具，已调整为适配 Vercel 的无状态运行环境：
 
 - 静态页面：`public/index.html`
-- API：`app.py`（Flask）
+- API：`api/index.py` -> 复用根目录 `app.py`（Flask）
 - docx 模板：`templates/<产品类型>/*.docx`
 
 ## 本地运行
@@ -25,3 +25,7 @@ python app.py
 
 > 提示：Vercel 建议把静态资源放到 `public/`，并且函数环境的磁盘是临时的，所以本项目改成 **/api/generate 直接返回 zip**。
 
+
+
+> 关键点：Vercel Python Serverless 只会自动识别 `api/*.py` 作为函数入口。
+> 本仓库通过 `api/index.py` 导出根目录 `app.py` 里的 Flask `app`，否则 `/api/*` 会返回 404。
