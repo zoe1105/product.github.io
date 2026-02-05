@@ -437,6 +437,23 @@ def _normalize_newlines(s: str) -> str:
     return (s or "").replace("\r\n", "\n").replace("\r", "\n")
 
 
+def _coerce_bool(value, default: bool = False) -> bool:
+    """把常见的布尔输入（bool/int/字符串）统一转换成 bool。"""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in {"1", "true", "yes", "y", "on"}:
+            return True
+        if v in {"0", "false", "no", "n", "off", ""}:
+            return False
+    return default
+
+
 def _is_blank_only(s: str) -> bool:
     # strip() 会处理中文全角空格（\u3000）
     return (s or "").strip() == ""
@@ -701,7 +718,7 @@ def api_generate():
     values_raw = payload.get("values", {}) or {}
     mode = payload.get("mode", "all")  # all / selected
     selected = payload.get("selected_templates", []) or []
-    blank_unfilled = bool(payload.get("blank_unfilled", True))
+    blank_unfilled = _coerce_bool(payload.get("blank_unfilled"), default=True)
 
     try:
         folder = get_product_folder(product_type)
