@@ -25,13 +25,16 @@ python app.py
 
 > 提示：Vercel 建议把静态资源放到 `public/`，并且函数环境的磁盘是临时的，所以本项目改成 **/api/generate 直接返回 zip**。
 
+另外，仓库包含：
+- `.python-version`（固定 Python 3.12，避免构建日志里的版本探测提示）；
+- `vercel.json` 使用 `functions + routes`（避免 `builds` 配置导致的 Vercel 警告）。
+
 ## 常见问题：Vercel 部署后 404
 
 如果仓库根目录只有 `app.py` 而没有 `vercel.json`，Vercel 可能无法正确识别 Flask 入口并把请求转发到 Python 函数，访问首页或 `/api/*` 会出现 404。
 
 本仓库现在通过 `vercel.json` 显式声明：
-- `app.py` 使用 `@vercel/python` 构建；
-- `public/**` 作为静态资源；
+- `app.py` 在 `functions` 中声明为 Python 3.12 运行时；
 - `/static/*` 指向 `public/static/*`；
 - 其余路由统一转发到 `app.py`。
 
