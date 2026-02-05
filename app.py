@@ -482,12 +482,12 @@ def _resolve_local_path(base_dir: str, maybe_path: str) -> Optional[str]:
     if os.path.isabs(p):
         return p
     p = p.replace("\\", "/").lstrip("/")
-    # 兼容：presets/...（放在 static 下）
+    # 兼容：presets/...（实际位于 public/static/presets）
     if p.startswith("presets/"):
-        return os.path.join(base_dir, "static", p)
-    # 兼容：static/...
+        return os.path.join(base_dir, "public", "static", p)
+    # 兼容：static/...（映射到 public/static/...）
     if p.startswith("static/"):
-        return os.path.join(base_dir, p)
+        return os.path.join(base_dir, "public", p)
     return os.path.join(base_dir, p)
 
 
